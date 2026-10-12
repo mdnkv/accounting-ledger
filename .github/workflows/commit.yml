@@ -1,0 +1,30 @@
+name: Commit stage
+on: [push]
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Check source code
+        uses: actions/checkout@v3
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          cache: gradle
+          distribution: temurin
+          java-version: 26
+      - name: Code vulnerability check
+        uses: anchore/scan-action@v7
+        id: scan
+        with:
+          path: "${{ github.workspace }}"
+          fail-build: false
+          severity-cutoff: 'medium'
+      - name: Build and run unit tests
+        run: |
+          chmod +x gradlew
+          ./gradlew build

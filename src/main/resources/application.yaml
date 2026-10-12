@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: accounting-ledger
+  datasource:
+    username: ${APP_DB_USER}
+    url: ${APP_DB_URL}
+    password: ${APP_DB_PASSWORD}
+    hikari:
+      connection-timeout: 2000
+      maximum-pool-size: 12
+  flyway:
+    user: ${APP_DB_USER}
+    password: ${APP_DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  threads:
+    virtual:
+      enabled: true
+server:
+  port: ${HTTP_PORT:8000}
+  tomcat:
+    connection-timeout: 2s
+    keep-alive-timeout: 15s
+    threads:
+      max: 50
+      min-spare: 12
