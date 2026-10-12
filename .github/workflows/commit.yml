@@ -1,6 +1,11 @@
 name: Commit stage
 on: [push]
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: mdnkv/accounting-ledger
+  VERSION: latest
+
 jobs:
   build:
     name: Build and test
