@@ -30,7 +30,7 @@ jobs:
           ./gradlew build
   package:
     name: Package and publish
-    if: ${{github.ref == 'regs/heads/main' }}
+    if: ${{github.ref == 'refs/heads/main' }}
     needs: [build]
     runs-on: ubuntu-latest
     permissions:

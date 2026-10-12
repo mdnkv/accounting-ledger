@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accounting-ledger-db
+  labels:
+    db: accounting-ledger-db
+spec:
+  selector:
+    matchLabels:
+      db: accounting-ledger-db
+  template:
+    metadata:
+      labels:
+        db: accounting-ledger-db
+    spec:
+      containers:
+        - name: accounting-ledger-db
+          image: postgres:18
+          env:
+            - name: POSTGRES_USER
+              value: acc_ledger_user
+            - name: POSTGRES_PASSWORD
+              value: secret1234
+            - name: POSTGRES_DB
+              value: acc_ledger_db
+          resources:
+            requests:
+              cpu: 100m
+              memory: 60Mi
+            limits:
+              cpu: 200m
+              memory: 120Mi
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: accounting-ledger-db
+  labels:
+    db: accounting-ledger-db
+spec:
+  type: ClusterIP
+  selector:
+    db: accounting-ledger-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accounting-ledger
+  labels:
+    app: accounting-ledger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: accounting-ledger
+  template:
+    metadata:
+      labels:
+        app: accounting-ledger
+    spec:
+      containers:
+        - name: accounting-ledger
+          image: accounting-ledger
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: BPL_JVM_THREAD_COUNT
+              value: "50"
+            - name: APP_DB_URL
+              value: "jdbc:postgresql://accounting-ledger-db:5432/acc_ledger_db"
+            - name: APP_DB_USER
+              value: "acc_ledger_user"
+            - name: APP_DB_PASSWORD
+              value: "secret1234"
