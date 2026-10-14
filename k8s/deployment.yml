@@ -24,8 +24,20 @@ spec:
             - name: BPL_JVM_THREAD_COUNT
               value: "50"
             - name: APP_DB_URL
-              value: "jdbc:postgresql://accounting-ledger-db:5432/acc_ledger_db"
+              value: "jdbc:postgresql://accounting-ledger-db/acc_ledger_db"
             - name: APP_DB_USER
               value: "acc_ledger_user"
             - name: APP_DB_PASSWORD
               value: "secret1234"
+          livenessProbe:
+            httpGet:
+              port: 8000
+              path: /actuator/health/liveness
+            initialDelaySeconds: 25
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              port: 8000
+              path: /actuator/health/readiness
+            initialDelaySeconds: 25
+            periodSeconds: 15
