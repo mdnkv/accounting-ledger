@@ -38,3 +38,5 @@ management:
         readiness:
           include:
             - readinessState
+app:
+  signing-key: ${APP_SIGNING_KEY}

@@ -7,6 +7,7 @@ import dev.mednikov.accounting.ledger.accounts.services.AccountCategoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -24,16 +25,19 @@ public class AccountCategoryRestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('accounts:create') and hasAuthority(#body.organizationId)")
     public @ResponseBody AccountCategoryResponse createAccountCategory (@RequestBody @Valid CreateAccountCategoryRequest body){
         return this.accountCategoryService.createAccountCategory(body);
     }
 
     @PutMapping
+    @PreAuthorize("hasAuthority('accounts:update') and hasAuthority(#body.organizationId)")
     public @ResponseBody AccountCategoryResponse updateAccountCategory (@RequestBody @Valid UpdateAccountCategoryRequest body){
         return this.accountCategoryService.updateAccountCategory(body);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('accounts:view')")
     public ResponseEntity<AccountCategoryResponse> getAccountCategoryById (@PathVariable UUID id){
         Optional<AccountCategoryResponse> result = this.accountCategoryService.getAccountCategoryById(id);
         return ResponseEntity.of(result);
