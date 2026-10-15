@@ -29,15 +29,17 @@ spec:
               value: "acc_ledger_user"
             - name: APP_DB_PASSWORD
               value: "secret1234"
+            - name: APP_SIGNING_KEY
+              value: "12345"
           livenessProbe:
             httpGet:
               port: 8000
               path: /actuator/health/liveness
-            initialDelaySeconds: 25
-            periodSeconds: 15
+            initialDelaySeconds: 40
+            periodSeconds: 30
           readinessProbe:
             httpGet:
               port: 8000
               path: /actuator/health/readiness
-            initialDelaySeconds: 25
-            periodSeconds: 15
+            initialDelaySeconds: 40
+            periodSeconds: 30
