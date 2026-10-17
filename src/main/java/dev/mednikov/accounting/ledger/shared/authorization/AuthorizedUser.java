@@ -1,4 +1,4 @@
-package dev.mednikov.accounting.ledger.shared.auth;
+package dev.mednikov.accounting.ledger.shared.authorization;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
