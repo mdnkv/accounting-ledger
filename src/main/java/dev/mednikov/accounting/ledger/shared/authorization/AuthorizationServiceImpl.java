@@ -35,14 +35,11 @@ public class AuthorizationServiceImpl implements AuthorizationService{
                 List<String> authorities = claimsSet.getStringListClaim("authorities");
                 return new AuthorizedUser(userId, organizationId, authorities);
             } else {
-                throw new AuthorizationException();
+                throw new AuthorizationException("Unable to verify the authorization token");
             }
         } catch (Exception ex){
-            logger.error(ex.getMessage());
-            throw new AuthorizationException();
+            throw new AuthorizationException(ex.getMessage());
         }
-
-
     }
 
 }
