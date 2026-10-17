@@ -5,6 +5,7 @@ import dev.mednikov.accounting.ledger.journals.domain.JournalEntryResponse;
 import dev.mednikov.accounting.ledger.journals.services.JournalEntryService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,6 +20,7 @@ public class JournalEntryRestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('journals:create') and hasAuthority(#body.organizationId)")
     public @ResponseBody JournalEntryResponse createJournalEntry (@RequestBody @Valid CreateJournalEntryRequest body){
         return this.journalEntryService.createJournalEntry(body);
     }
