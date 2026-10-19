@@ -23,14 +23,11 @@ spec:
           env:
             - name: BPL_JVM_THREAD_COUNT
               value: "50"
-            - name: APP_DB_URL
-              value: "jdbc:postgresql://accounting-ledger-db/acc_ledger_db"
-            - name: APP_DB_USER
-              value: "acc_ledger_user"
-            - name: APP_DB_PASSWORD
-              value: "secret1234"
             - name: APP_SIGNING_KEY
-              value: "12345"
+              value: "975b3ff06942cc911e0fb23576ae29466099648ba09f62450fbdbf4c9036a38d"
+          volumeMounts:
+            - mountPath: /workspace/config
+              name: accounting-ledger-config-volume
           livenessProbe:
             httpGet:
               port: 8000
@@ -43,3 +40,7 @@ spec:
               path: /actuator/health/readiness
             initialDelaySeconds: 40
             periodSeconds: 30
+      volumes:
+        - name: accounting-ledger-config-volume
+          configMap:
+            name: accounting-ledger-config

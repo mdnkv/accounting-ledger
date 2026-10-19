@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: accounting-ledger-config
+  labels:
+    app: accounting-ledger
+data:
+  application.yml: |
+    spring:
+      datasource:
+        url: jdbc:postgresql://accounting-ledger-db/acc_ledger_db
+        username: acc_ledger_user
+        password: secret1234
