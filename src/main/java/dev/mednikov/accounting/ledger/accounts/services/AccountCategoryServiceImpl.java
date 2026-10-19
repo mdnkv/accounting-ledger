@@ -8,8 +8,15 @@ import dev.mednikov.accounting.ledger.accounts.exceptions.AccountCategoryDoesNot
 import dev.mednikov.accounting.ledger.accounts.mappers.AccountCategoryResponseMapper;
 import dev.mednikov.accounting.ledger.accounts.models.AccountCategory;
 import dev.mednikov.accounting.ledger.accounts.repositories.AccountCategoryRepository;
+import dev.mednikov.accounting.ledger.shared.domain.PaginationRequest;
+import dev.mednikov.accounting.ledger.shared.domain.PaginationResponse;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -70,6 +77,14 @@ public class AccountCategoryServiceImpl implements AccountCategoryService{
 
         // Return result
         return this.mapper.apply(result);
+    }
+
+    @Override
+    public PaginationResponse<AccountCategoryResponse> getAccountCategories(UUID organizationId, PaginationRequest request) {
+        Pageable pageable = PageRequest.of(request.page() - 1, request.count(), request.sortingOrder().getSort());
+        Page<AccountCategory> result = this.accountCategoryRepository.findAllByOrganizationId(organizationId, pageable);
+        List<AccountCategoryResponse> data = result.map(this.mapper).stream().toList();
+        return new PaginationResponse<>(data, result.getTotalPages(), result.getTotalElements());
     }
 
     @Override

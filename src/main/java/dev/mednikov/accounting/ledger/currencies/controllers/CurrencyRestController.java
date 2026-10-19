@@ -3,6 +3,9 @@ package dev.mednikov.accounting.ledger.currencies.controllers;
 import java.util.Optional;
 import java.util.UUID;
 
+import dev.mednikov.accounting.ledger.shared.domain.PaginationRequest;
+import dev.mednikov.accounting.ledger.shared.domain.PaginationResponse;
+import dev.mednikov.accounting.ledger.shared.domain.SortingOrder;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +38,19 @@ public class CurrencyRestController {
     @PreAuthorize("hasAuthority('currencies:update') and hasAuthority(#body.organizationId)")
     public @ResponseBody CurrencyResponse updateCurrency (@RequestBody @Valid UpdateCurrencyRequest body){
         return this.currencyService.updateCurrency(body);
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAuthority('currencies:view')")
+    public PaginationResponse<CurrencyResponse> getCurrencies (
+            @RequestParam(required = true) UUID organizationId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "name-asc") String order,
+            @RequestParam(defaultValue = "10") int count
+    ){
+        SortingOrder sortingOrder = new SortingOrder(order);
+        PaginationRequest request = new PaginationRequest(sortingOrder, page, count);
+        return this.currencyService.getCurrencies(organizationId, request);
     }
 
     @GetMapping("/{id}")
