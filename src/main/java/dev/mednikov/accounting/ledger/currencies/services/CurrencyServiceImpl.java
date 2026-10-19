@@ -8,8 +8,14 @@ import dev.mednikov.accounting.ledger.currencies.exceptions.CurrencyDoesNotExist
 import dev.mednikov.accounting.ledger.currencies.mappers.CurrencyResponseMapper;
 import dev.mednikov.accounting.ledger.currencies.models.Currency;
 import dev.mednikov.accounting.ledger.currencies.repositories.CurrencyRepository;
+import dev.mednikov.accounting.ledger.shared.domain.PaginationRequest;
+import dev.mednikov.accounting.ledger.shared.domain.PaginationResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -94,6 +100,14 @@ public class CurrencyServiceImpl implements CurrencyService{
 
         // Return dto
         return this.mapper.apply(result);
+    }
+
+    @Override
+    public PaginationResponse<CurrencyResponse> getCurrencies(UUID organizationId, PaginationRequest request) {
+        Pageable pageable = PageRequest.of(request.page() - 1, request.count(), request.sortingOrder().getSort());
+        Page<Currency> result = this.currencyRepository.findAllByOrganizationId(organizationId, pageable);
+        List<CurrencyResponse> data = result.map(this.mapper).stream().toList();
+        return new PaginationResponse<>(data, result.getTotalPages(), result.getTotalElements());
     }
 
     @Override

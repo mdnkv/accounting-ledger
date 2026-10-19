@@ -10,9 +10,16 @@ import dev.mednikov.accounting.ledger.journals.exceptions.NotBalancedEntryExcept
 import dev.mednikov.accounting.ledger.journals.mappers.JournalEntryResponseMapper;
 import dev.mednikov.accounting.ledger.journals.models.JournalEntry;
 import dev.mednikov.accounting.ledger.journals.repositories.JournalEntryRepository;
+import dev.mednikov.accounting.ledger.shared.domain.PaginationRequest;
+import dev.mednikov.accounting.ledger.shared.domain.PaginationResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class JournalEntryServiceImpl implements JournalEntryService {
@@ -65,5 +72,13 @@ public class JournalEntryServiceImpl implements JournalEntryService {
 
         // Return result
         return this.mapper.apply(result);
+    }
+
+    @Override
+    public PaginationResponse<JournalEntryResponse> getJournalEntries(UUID organizationId, PaginationRequest request) {
+        Pageable pageable = PageRequest.of(request.page() - 1, request.count(), request.sortingOrder().getSort());
+        Page<JournalEntry> result = this.journalEntryRepository.findAllByOrganizationId(organizationId, pageable);
+        List<JournalEntryResponse> data = result.map(this.mapper).stream().toList();
+        return new PaginationResponse<>(data, result.getTotalPages(), result.getTotalElements());
     }
 }

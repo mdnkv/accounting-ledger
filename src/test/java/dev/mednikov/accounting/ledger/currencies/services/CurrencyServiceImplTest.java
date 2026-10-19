@@ -9,12 +9,18 @@ import dev.mednikov.accounting.ledger.currencies.mappers.CurrencyResponseMapper;
 import dev.mednikov.accounting.ledger.currencies.mappers.CurrencyResponseMapperImpl;
 import dev.mednikov.accounting.ledger.currencies.models.Currency;
 import dev.mednikov.accounting.ledger.currencies.repositories.CurrencyRepository;
+import dev.mednikov.accounting.ledger.shared.domain.PaginationRequest;
+import dev.mednikov.accounting.ledger.shared.domain.PaginationResponse;
+import dev.mednikov.accounting.ledger.shared.domain.SortingOrder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -138,6 +144,50 @@ class CurrencyServiceImplTest {
 
         CurrencyResponse result = service.updateCurrency(requestDto);
         assertThat(result).isNotNull();
+    }
+
+    @Test
+    void getCurrenciesTest(){
+        UUID organizationId = UUID.randomUUID();
+
+        List<Currency> currencies = new ArrayList<>();
+
+        Currency currency1 = new Currency();
+        currency1.setId(UUID.randomUUID());
+        currency1.setCurrencyCode("EUR");
+        currency1.setName("Euro");
+        currency1.setOrganizationId(organizationId);
+        currency1.setActive(true);
+        currency1.setPrimary(true);
+        currencies.add(currency1);
+
+        Currency currency2 = new Currency();
+        currency2.setId(UUID.randomUUID());
+        currency2.setCurrencyCode("EUR");
+        currency2.setName("Euro");
+        currency2.setActive(true);
+        currency2.setPrimary(false);
+        currency2.setOrganizationId(organizationId);
+        currencies.add(currency2);
+
+        String sortBy = "name-asc";
+        Pageable pageable = PageRequest.of(1, 10, Sort.by("name").ascending());
+        Page<Currency> page = new PageImpl<>(currencies, pageable, 20);
+
+        SortingOrder sortingOrder = new SortingOrder(sortBy);
+        PaginationRequest request = new PaginationRequest(sortingOrder, 1, 10);
+
+        when(currencyRepository.findAllByOrganizationId(any(), any())).thenReturn(page);
+
+        PaginationResponse<CurrencyResponse> result = service.getCurrencies(organizationId, request);
+        assertThat(result).isNotNull()
+                .hasFieldOrProperty("data")
+                .hasFieldOrPropertyWithValue("totalPages", 2)
+                .hasFieldOrPropertyWithValue("totalCount", 20L);
+
+        assertThat(result.data()).hasSize(currencies.size());
+
+
     }
 
     @Test

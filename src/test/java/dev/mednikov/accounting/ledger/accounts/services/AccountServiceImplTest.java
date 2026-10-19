@@ -16,12 +16,18 @@ import dev.mednikov.accounting.ledger.accounts.models.AccountCategory;
 import dev.mednikov.accounting.ledger.accounts.models.AccountType;
 import dev.mednikov.accounting.ledger.accounts.repositories.AccountCategoryRepository;
 import dev.mednikov.accounting.ledger.accounts.repositories.AccountRepository;
+import dev.mednikov.accounting.ledger.shared.domain.PaginationRequest;
+import dev.mednikov.accounting.ledger.shared.domain.PaginationResponse;
+import dev.mednikov.accounting.ledger.shared.domain.SortingOrder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -275,6 +281,59 @@ class AccountServiceImplTest {
 
         AccountResponse result = service.updateAccount(requestDto);
         assertThat(result).isNotNull();
+    }
+
+    @Test
+    void getAccountsTest(){
+        UUID organizationId = UUID.randomUUID();
+        UUID accountCategoryId = UUID.randomUUID();
+
+        AccountCategory accountCategory = new AccountCategory();
+        accountCategory.setId(accountCategoryId);
+        accountCategory.setName("Current assets");
+        accountCategory.setAccountType(AccountType.ASSET);
+        accountCategory.setOrganizationId(organizationId);
+        accountCategory.setActive(true);
+
+        List<Account> accounts = new ArrayList<>();
+
+        Account account1 = new Account();
+        account1.setOrganizationId(organizationId);
+        account1.setBalanceType(AccountBalanceType.DEBIT);
+        account1.setAccountCategory(accountCategory);
+        account1.setActive(true);
+        account1.setName("Cash");
+        account1.setCode("10100");
+        account1.setId(UUID.randomUUID());
+        accounts.add(account1);
+
+        Account account2 = new Account();
+        account2.setOrganizationId(organizationId);
+        account2.setBalanceType(AccountBalanceType.DEBIT);
+        account2.setAccountCategory(accountCategory);
+        account2.setActive(true);
+        account2.setName("Accounts Receivable");
+        account2.setCode("12100");
+        account2.setId(UUID.randomUUID());
+        accounts.add(account2);
+
+        String sortBy = "name-asc";
+        Pageable pageable = PageRequest.of(1, 10, Sort.by("name").ascending());
+        Page<Account> page = new PageImpl<>(accounts, pageable, 30);
+
+        SortingOrder sortingOrder = new SortingOrder(sortBy);
+        PaginationRequest request = new PaginationRequest(sortingOrder, 1, 10);
+
+        when(accountRepository.findAllByOrganizationId(any(), any())).thenReturn(page);
+
+        PaginationResponse<AccountResponse> result = service.getAccounts(organizationId, request);
+        assertThat(result).isNotNull()
+                .hasFieldOrProperty("data")
+                .hasFieldOrPropertyWithValue("totalPages", 3)
+                .hasFieldOrPropertyWithValue("totalCount", 30L);
+
+        assertThat(result.data()).hasSize(accounts.size());
+
     }
 
     @Test

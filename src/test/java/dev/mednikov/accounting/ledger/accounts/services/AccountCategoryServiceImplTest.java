@@ -9,12 +9,18 @@ import dev.mednikov.accounting.ledger.accounts.mappers.AccountCategoryResponseMa
 import dev.mednikov.accounting.ledger.accounts.models.AccountCategory;
 import dev.mednikov.accounting.ledger.accounts.models.AccountType;
 import dev.mednikov.accounting.ledger.accounts.repositories.AccountCategoryRepository;
+import dev.mednikov.accounting.ledger.shared.domain.PaginationRequest;
+import dev.mednikov.accounting.ledger.shared.domain.PaginationResponse;
+import dev.mednikov.accounting.ledger.shared.domain.SortingOrder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -126,6 +132,51 @@ class AccountCategoryServiceImplTest {
 
         AccountCategoryResponse result = service.updateAccountCategory(request);
         assertThat(result).isNotNull();
+    }
+
+    @Test
+    void getAccountCategoriesTest(){
+        List<AccountCategory> accountCategories = new ArrayList<>();
+        UUID organizationId = UUID.randomUUID();
+
+        AccountCategory accountCategory1 = new AccountCategory();
+        accountCategory1.setId(UUID.randomUUID());
+        accountCategory1.setName("Current assets");
+        accountCategory1.setAccountType(AccountType.ASSET);
+        accountCategory1.setOrganizationId(organizationId);
+        accountCategories.add(accountCategory1);
+
+        AccountCategory accountCategory2 = new AccountCategory();
+        accountCategory2.setId(UUID.randomUUID());
+        accountCategory2.setName("Non current assets");
+        accountCategory2.setAccountType(AccountType.ASSET);
+        accountCategory2.setOrganizationId(organizationId);
+        accountCategories.add(accountCategory2);
+
+        AccountCategory accountCategory3 = new AccountCategory();
+        accountCategory3.setId(UUID.randomUUID());
+        accountCategory3.setName("Current Liabilities");
+        accountCategory3.setAccountType(AccountType.LIABILITY);
+        accountCategory3.setOrganizationId(organizationId);
+        accountCategories.add(accountCategory3);
+
+        String sortBy = "name-asc";
+        Pageable pageable = PageRequest.of(1, 10, Sort.by("name").ascending());
+        Page<AccountCategory> page = new PageImpl<>(accountCategories, pageable, 50);
+
+        SortingOrder sortingOrder = new SortingOrder(sortBy);
+        PaginationRequest request = new PaginationRequest(sortingOrder, 1, 10);
+
+        when(accountCategoryRepository.findAllByOrganizationId(any(), any())).thenReturn(page);
+
+        PaginationResponse<AccountCategoryResponse> result = service.getAccountCategories(organizationId, request);
+        assertThat(result).isNotNull()
+                .hasFieldOrProperty("data")
+                .hasFieldOrPropertyWithValue("totalPages", 5)
+                .hasFieldOrPropertyWithValue("totalCount", 50L);
+
+        assertThat(result.data()).hasSize(accountCategories.size());
+
     }
 
     @Test
