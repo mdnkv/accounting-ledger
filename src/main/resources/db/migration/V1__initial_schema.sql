@@ -66,4 +66,16 @@ CREATE TABLE IF NOT EXISTS journal_entry_lines (
             ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS periods (
+    id UUID PRIMARY KEY,
+    organization_id UUID NOT NULL,
+    closing_journal_entry_id UUID,
+    period_start_date DATE NOT NULL,
+    period_end_date DATE NOT NULL,
+    is_closed BOOLEAN NOT NULL,
+    UNIQUE(organization_id, period_start_date, period_end_date),
+       CONSTRAINT fk_periods_closing_journal_entry
+        FOREIGN KEY (closing_journal_entry_id) REFERENCES journal_entries(id) ON DELETE SET NULL
+);
+
 COMMIT;
